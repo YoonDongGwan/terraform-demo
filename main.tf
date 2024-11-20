@@ -191,23 +191,93 @@ terraform {
 #   }
 # }
 
-variable "names" {
-  default = {
-    a = "hello a"
-    b = "hello b"
-    c = "hello c"
-  }
+# variable "names" {
+#   default = {
+#     a = "hello a"
+#     b = "hello b"
+#     c = "hello c"
+#   }
+# }
+
+# data "archive_file" "dotfiles" {
+#   type = "zip"
+#   output_path = "${path.module}/dotfiles.zip"
+
+#   dynamic "source" {
+#     for_each = var.names
+#     content {
+#       content = source.value
+#       filename = "${path.module}/${source.key}.txt"
+#     }
+#   }
+# }
+
+# variable "enable_file" {
+#   default = false
+#   # default = true
+# }
+# resource "local_file" "foo" {
+#   count = var.enable_file ? 1 : 0
+#   content = "foo!"
+#   filename = "${path.module}/foo.bar"
+# }
+
+# output "content" {
+#   value = var.enable_file ? local_file.foo[0].content:""
+# }
+
+# resource "local_file" "foo" {
+#   content = upper("foo!")
+#   filename = "foo.bar"
+# }
+
+# variable "sensitive_content" {
+#   default = "secret"
+#   sensitive = true
+# }
+# resource "local_file" "foo" {
+#   content = upper(var.sensitive_content)
+#   filename = "foo.bar"
+
+#   provisioner "local-exec" {
+#     command = "echo The content is ${self.content}"
+#   }
+#   provisioner "local-exec" {
+#     command = "abc"
+#     on_failure = continue
+#   }
+#   provisioner "local-exec" {
+#     when = destroy
+#     command = "echo The deleting filename is  ${self.filename}"
+#   }
+# }
+variable "username" {
+  type = string
+}
+variable "host" {
+  type = string
+}
+variable "password" {
+  type = string
+}
+variable "port" {
+  type = number
 }
 
-data "archive_file" "dotfiles" {
-  type = "zip"
-  output_path = "${path.module}/dotfiles.zip"
-
-  dynamic "source" {
-    for_each = var.names
-    content {
-      content = source.value
-      filename = "${path.module}/${source.key}.txt"
-    }
+resource "null_resource" "example1" {
+  connection {
+    type = "ssh"
+    user = var.username
+    password = var.password
+    host = var.host
+    port = var.port
+  }
+  provisioner "file" {
+    source = "tfplan"
+    destination = "~/tfplan"
+  }
+  provisioner "file" {
+    content = "terraform file"
+    destination = "~/tffile"
   }
 }
