@@ -251,33 +251,40 @@ terraform {
 #     command = "echo The deleting filename is  ${self.filename}"
 #   }
 # }
-variable "username" {
-  type = string
-}
-variable "host" {
-  type = string
-}
-variable "password" {
-  type = string
-}
-variable "port" {
-  type = number
-}
+# variable "username" {
+#   type = string
+# }
+# variable "host" {
+#   type = string
+# }
+# variable "password" {
+#   type = string
+# }
+# variable "port" {
+#   type = number
+# }
 
-resource "null_resource" "example1" {
-  connection {
-    type = "ssh"
-    user = var.username
-    password = var.password
-    host = var.host
-    port = var.port
-  }
-  provisioner "file" {
-    source = "tfplan"
-    destination = "~/tfplan"
-  }
-  provisioner "file" {
-    content = "terraform file"
-    destination = "~/tffile"
-  }
+resource "null_resource" "example2" {
+  # connection {
+  #   type = "ssh"
+  #   user = var.username
+  #   password = var.password
+  #   host = var.host
+  #   port = var.port
+  # }
+  # provisioner "file" {
+  #   source = "tfplan"
+  #   destination = "~/tfplan"
+  # }
+  # provisioner "file" {
+  #   content = "terraform file"
+  #   destination = "~/tffile"
+  # }
+
+  # provisioner "remote-exec" {
+  #   inline = [ 
+  #     "echo 'Terraform!' > ~/tffile",
+  #     "cat ~/tffile"
+  #   ]
+  # }
 }
