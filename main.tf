@@ -5,11 +5,18 @@ terraform {
         source = "hashicorp/local"
         version = ">= 2.0.0"
       }
+    aws = {
+      source = "hashicorp/aws"
+    }
   }
   backend "local" {
     path = "state/terraform.tfstate"
   }
 }
+
+# provider "aws" {
+#   region = "ap-northeast-3"
+# }
 
 # resource "local_file" "abc" {
 #   content  = "abc!"
@@ -264,7 +271,7 @@ terraform {
 #   type = number
 # }
 
-resource "null_resource" "example2" {
+# resource "null_resource" "example2" {
   # connection {
   #   type = "ssh"
   #   user = var.username
@@ -287,4 +294,33 @@ resource "null_resource" "example2" {
   #     "cat ~/tffile"
   #   ]
   # }
+# }
+
+# data "aws_ami" "amzn2" {
+#   most_recent = true
+#   owners = [ "amazon" ]
+#   filter {
+#     name = "owner-alias"
+#     values = ["amazon"]
+#   }
+#   filter {
+#     name = "name"
+#     values = ["amzn2-ami-hvm*"]
+#   }
+# }
+
+# resource "aws_instance" "name" {
+#   ami = data.aws_ami.amzn2.id
+#   instance_type = "t3.micro"
+#   tags = {
+#     Name = "ExampleAppServerInstance"
+#   }
+# }
+
+module "mypw1" {
+  source = "./modules/terraform-random-pwgen"
+}
+
+output "mypw1" {
+  value = module.mypw1
 }
