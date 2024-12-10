@@ -10,3 +10,6 @@ variable "availability_zone" {
 variable "subnet_name" {
   type = string
 }
+variable "automatic_public_ip" {
+  type = bool
+}

@@ -1,5 +1,5 @@
 variable "region" {
-  type = string
+  type    = string
   default = "ap-northeast-2"
 }
 variable "vpc_cidr_block" {
