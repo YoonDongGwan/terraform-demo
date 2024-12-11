@@ -25,10 +25,11 @@ resource "aws_instance" "ec2_instance" {
   instance_type = var.instance_type
   subnet_id = var.subnet_id
   key_name = aws_key_pair.ec2_key_pair.key_name
-  security_groups = [ aws_security_group.ec2_security_group.id ]
+  vpc_security_group_ids = [ aws_security_group.ec2_security_group.id ]
   tags = {
     Name = var.instance_name
   }
+  depends_on = [ aws_security_group.ec2_security_group ]
 }
 
 resource "aws_security_group" "ec2_security_group" {

@@ -25,5 +25,5 @@ variable "region" {
 }
 variable "nat_az" {
   type = string
-  default = ""
+  default = null
 }

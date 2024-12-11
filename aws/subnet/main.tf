@@ -37,7 +37,8 @@ resource "aws_route_table" "route_table" {
   vpc_id = var.vpc_id
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = var.access_modifier == "public" ? aws_internet_gateway.internet_gateway[0].id : aws_nat_gateway.nat_gateway[0].id
+    gateway_id = var.access_modifier == "public" ? aws_internet_gateway.internet_gateway[0].id : null
+    nat_gateway_id = var.access_modifier == "private" ? aws_nat_gateway.nat_gateway[0].id : null
   }
   route {
     cidr_block = var.vpc_cidr_block

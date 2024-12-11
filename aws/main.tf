@@ -64,15 +64,15 @@ module "private_subnet" {
   region              = var.region
 }
 
-# module "ec2_bastion" {
-#   source        = "./ec2"
-#   instance_type = "t2.micro"
-#   subnet_id     = module.public_subnet["ap-northeast-2a"].subnet_id
-#   public_key    = "SSH PUB KEY"
-#   instance_name = "ec2-ap-northeast-2a-bastion"
-#   vpc_id = module.vpc.vpc_id
-#   security_group_name = "sgr-ec2-ap-northeast-2a-bastion"
-# }
+module "ec2_bastion" {
+  source        = "./ec2"
+  instance_type = "t2.micro"
+  subnet_id     = module.public_subnet.subnet_id[0]
+  public_key    = var.public_key
+  instance_name = "ec2-${element(local.availability_zones,0)}-bastion"
+  vpc_id = module.vpc.vpc_id
+  security_group_name = "sgr-ec2-${var.region}-bastion"
+}
 
 # module "eks_cluster" {
 #   source = "./eks"
