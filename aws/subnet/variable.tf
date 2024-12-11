@@ -7,18 +7,23 @@ variable "subnet_cidr_blocks" {
 variable "availability_zones" {
   type = list(string)
 }
-variable "subnet_name" {
-  type = string
-}
 variable "automatic_public_ip" {
   type = bool
 }
 variable "vpc_cidr_block" {
   type = string
 }
-variable "route_table_cidr_block" {
+variable "access_modifier" {
   type = string
 }
-variable "route_table_gateway_id" {
+variable "nat_subnet_id" {
   type = string
+  default = null
+}
+variable "region" {
+  type = string
+}
+variable "nat_az" {
+  type = string
+  default = ""
 }
