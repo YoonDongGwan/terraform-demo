@@ -67,8 +67,8 @@ module "eks_cluster" {
   bastion_ip = module.ec2_bastion.bastion_ip
   node_group_name = "eks-node-group-t3-medium"
   node_group_instance_type = "t3.medium"
-  scaling_desired_size = 3
-  scaling_max_size = 2
+  scaling_desired_size = 2
+  scaling_max_size = 3
   scaling_min_size = 2
   vpc_id = module.vpc.vpc_id
   region = var.region
