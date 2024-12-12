@@ -12,25 +12,15 @@ provider "aws" {
 }
 
 locals {
-  public_subnet_cidr_block = [
-    cidrsubnet(var.vpc_cidr_block, 8, 0),
-    cidrsubnet(var.vpc_cidr_block, 8, 1)
-  ]
-
-
-  private_subnet_cidr_block = [
-    cidrsubnet(var.vpc_cidr_block, 8, 10),
-    cidrsubnet(var.vpc_cidr_block, 8, 11),
-    cidrsubnet(var.vpc_cidr_block, 8, 12)
-  ]
-
-  availability_zones = [
-    "ap-northeast-2a",
-    "ap-northeast-2b",
-    "ap-northeast-2c",
-    "ap-northeast-2d"
-  ]
-
+  public_subnet_cidr_blocks = {
+    "ap-northeast-2a" = cidrsubnet(var.vpc_cidr_block, 8, 0),
+    "ap-northeast-2b" = cidrsubnet(var.vpc_cidr_block, 8, 1)
+  }
+  private_subnet_cidr_blocks = {
+    "ap-northeast-2a" = cidrsubnet(var.vpc_cidr_block, 8, 10),
+    "ap-northeast-2b" = cidrsubnet(var.vpc_cidr_block, 8, 11),
+    "ap-northeast-2c" = cidrsubnet(var.vpc_cidr_block, 8, 12)
+  }
 }
 
 module "vpc" {
@@ -42,9 +32,8 @@ module "vpc" {
 
 module "public_subnet" {
   source              = "./subnet"
-  subnet_cidr_blocks  = local.public_subnet_cidr_block
+  subnet_cidr_blocks  = local.public_subnet_cidr_blocks
   vpc_id              = module.vpc.vpc_id
-  availability_zones  = local.availability_zones
   automatic_public_ip = true
   vpc_cidr_block      = var.vpc_cidr_block
   access_modifier     = "public"
@@ -53,26 +42,24 @@ module "public_subnet" {
 
 module "private_subnet" {
   source              = "./subnet"
-  subnet_cidr_blocks  = local.private_subnet_cidr_block
+  subnet_cidr_blocks  = local.private_subnet_cidr_blocks
   vpc_id              = module.vpc.vpc_id
-  availability_zones  = local.availability_zones
   automatic_public_ip = false
   vpc_cidr_block      = var.vpc_cidr_block
   access_modifier     = "private"
   nat_subnet_id       = module.public_subnet.subnet_id[0]
-  nat_az              = element(local.availability_zones, 0)
   region              = var.region
 }
 
-module "ec2_bastion" {
-  source        = "./ec2"
-  instance_type = "t2.micro"
-  subnet_id     = module.public_subnet.subnet_id[0]
-  public_key    = var.public_key
-  instance_name = "ec2-${element(local.availability_zones,0)}-bastion"
-  vpc_id = module.vpc.vpc_id
-  security_group_name = "sgr-ec2-${var.region}-bastion"
-}
+# module "ec2_bastion" {
+#   source        = "./ec2"
+#   instance_type = "t2.micro"
+#   subnet_id     = module.public_subnet.subnet_id[0]
+#   public_key    = var.public_key
+#   instance_name = "ec2-${element(local.availability_zones,0)}-bastion"
+#   vpc_id = module.vpc.vpc_id
+#   security_group_name = "sgr-ec2-${var.region}-bastion"
+# }
 
 # module "eks_cluster" {
 #   source = "./eks"

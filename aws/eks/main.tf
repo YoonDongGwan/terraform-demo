@@ -7,6 +7,9 @@ resource "aws_eks_cluster" "eks_cluster" {
     endpoint_private_access = true
     endpoint_public_access = false
   }
+  access_config {
+    authentication_mode = "API"
+  }
 }
 
 resource "aws_eks_node_group" "eks_node_group" {
@@ -37,35 +40,35 @@ data "aws_iam_policy_document" "eks_assume_role" {
   }
 }
 
-resource "aws_iam_role" "eks-cluster" {
+resource "aws_iam_role" "eks_cluster" {
   name               = "eks-cluster-role"
   assume_role_policy = data.aws_iam_policy_document.eks_assume_role.json
 }
 
-resource "aws_iam_role_policy_attachment" "eks-cluster-AmazonEKSClusterPolicy" {
+resource "aws_iam_role_policy_attachment" "eks_cluster_AmazonEKSClusterPolicy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
-  role       = aws_iam_role.eks-cluster.name
+  role       = aws_iam_role.eks_cluster.name
 }
 
-resource "aws_iam_role_policy_attachment" "eks-cluster-AmazonEKSVPCResourceController" {
+resource "aws_iam_role_policy_attachment" "eks_cluster_AmazonEKSVPCResourceController" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSVPCResourceController"
-  role       = aws_iam_role.eks-cluster.name
+  role       = aws_iam_role.eks_cluster.name
 }
 
-resource "aws_security_group" "eks-ap-northeast-2-cluster" {
+resource "aws_security_group" "eks_ap-northeast_2_cluster" {
   name = "sgr-eks-ap-northeast-2-cluster"
   vpc_id = var.vpc_id
 }
 
-resource "aws_vpc_security_group_ingress_rule" "allow-https-from-bastion" {
-  security_group_id = aws_security_group.eks-ap-northeast-2-cluster.id
+resource "aws_vpc_security_group_ingress_rule" "allow_https_from_bastion" {
+  security_group_id = aws_security_group.eks_ap_northeast_2_cluster.id
   cidr_ipv4 = "${var.bastion_ip}/32"
   from_port = 443
   to_port = 443
   ip_protocol = "tcp"
 }
 
-resource "aws_iam_role" "eks-node-group" {
+resource "aws_iam_role" "eks_node_group" {
   name = "eks-node-group-role"
 
   assume_role_policy = jsonencode({
@@ -82,16 +85,16 @@ resource "aws_iam_role" "eks-node-group" {
 
 resource "aws_iam_role_policy_attachment" "eks-node-group-AmazonEKSWorkerNodePolicy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
-  role       = aws_iam_role.eks-node-group.name
+  role       = aws_iam_role.eks_node_group.name
 }
 
 resource "aws_iam_role_policy_attachment" "eks-node-group-AmazonEKS_CNI_Policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
-  role       = aws_iam_role.eks-node-group.name
+  role       = aws_iam_role.eks_node_group.name
 }
 
 resource "aws_iam_role_policy_attachment" "eks-node-group-AmazonEC2ContainerRegistryReadOnly" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
-  role       = aws_iam_role.eks-node-group.name
+  role       = aws_iam_role.eks_node_group.name
 }
 

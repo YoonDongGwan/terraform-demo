@@ -1,11 +1,11 @@
 resource "aws_subnet" "subnet" {
-  count = length(var.subnet_cidr_blocks)
+  for_each = var.subnet_cidr_blocks
   vpc_id = var.vpc_id
-  cidr_block = element(var.subnet_cidr_blocks,count.index)
-  availability_zone = element(var.availability_zones, count.index)
+  cidr_block = each.value
+  availability_zone = each.key
   map_public_ip_on_launch = var.automatic_public_ip
   tags = {
-    Name = "subnet-${element(var.availability_zones, count.index)}-${var.access_modifier}"
+    Name = "subnet-${each.key}-${var.access_modifier}"
   }
 }
 resource "aws_internet_gateway" "internet_gateway" {
@@ -21,7 +21,7 @@ resource "aws_nat_gateway" "nat_gateway" {
   allocation_id = aws_eip.nat_ip[0].id
   subnet_id = var.nat_subnet_id
   tags = {
-    Name = "nat-${var.nat_az}-public"
+    Name = "nat-${keys(var.subnet_cidr_blocks)[0]}-public"
   }
 }
 
@@ -29,7 +29,7 @@ resource "aws_eip" "nat_ip" {
   count = var.access_modifier == "private" ? 1 : 0
   domain = "vpc"
   tags = {
-    Name = "eip-${var.nat_az}-nat"
+    Name = "eip-${keys(var.subnet_cidr_blocks)[0]}-nat"
   }
 }
 
@@ -50,7 +50,7 @@ resource "aws_route_table" "route_table" {
 }
 
 resource "aws_route_table_association" "route_table_association" {
-  count = length(var.subnet_cidr_blocks)
-  subnet_id = aws_subnet.subnet[count.index].id
+  for_each = var.subnet_cidr_blocks
+  subnet_id = aws_subnet.subnet[each.key].id
   route_table_id = aws_route_table.route_table.id
 }

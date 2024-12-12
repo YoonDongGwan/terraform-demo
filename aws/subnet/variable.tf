@@ -2,10 +2,7 @@ variable "vpc_id" {
   type = string
 }
 variable "subnet_cidr_blocks" {
-  type = list(string)
-}
-variable "availability_zones" {
-  type = list(string)
+  type = map(string)
 }
 variable "automatic_public_ip" {
   type = bool
@@ -22,8 +19,4 @@ variable "nat_subnet_id" {
 }
 variable "region" {
   type = string
-}
-variable "nat_az" {
-  type = string
-  default = null
 }
