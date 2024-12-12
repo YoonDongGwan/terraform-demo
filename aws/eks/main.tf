@@ -1,11 +1,11 @@
 resource "aws_eks_cluster" "eks_cluster" {
   name = var.cluster_name
-  role_arn = aws_iam_role.eks-cluster.arn
+  role_arn = aws_iam_role.eks_cluster.arn
   vpc_config {
-    subnet_ids = [ var.private_subnet_a, var.private_subnet_b ]
-    security_group_ids = [ aws_security_group.eks-ap-northeast-2-cluster.id ]
-    endpoint_private_access = true
-    endpoint_public_access = false
+    subnet_ids = var.subnet_list
+    security_group_ids = [ aws_security_group.eks_cluster_security_group.id ]
+    endpoint_private_access = var.endpoint_private_access
+    endpoint_public_access = var.endpoint_public_access
   }
   access_config {
     authentication_mode = "API"
@@ -15,8 +15,8 @@ resource "aws_eks_cluster" "eks_cluster" {
 resource "aws_eks_node_group" "eks_node_group" {
   cluster_name = aws_eks_cluster.eks_cluster.name
   node_group_name = var.node_group_name
-  node_role_arn = aws_iam_role.eks-node-group.arn
-  subnet_ids = [ var.private_subnet_a, var.private_subnet_b ]
+  node_role_arn = aws_iam_role.eks_node_group.arn
+  subnet_ids = var.subnet_list
   capacity_type = "ON_DEMAND"
   scaling_config {
     desired_size = var.scaling_desired_size
@@ -24,7 +24,7 @@ resource "aws_eks_node_group" "eks_node_group" {
     min_size = var.scaling_min_size
   }
   instance_types = [ var.node_group_instance_type ]
-  depends_on = [ aws_iam_role.eks-node-group ]
+  depends_on = [ aws_iam_role.eks_node_group ]
 }
 
 data "aws_iam_policy_document" "eks_assume_role" {
@@ -55,13 +55,13 @@ resource "aws_iam_role_policy_attachment" "eks_cluster_AmazonEKSVPCResourceContr
   role       = aws_iam_role.eks_cluster.name
 }
 
-resource "aws_security_group" "eks_ap-northeast_2_cluster" {
-  name = "sgr-eks-ap-northeast-2-cluster"
+resource "aws_security_group" "eks_cluster_security_group" {
+  name = "sgr-eks-${var.region}-cluster"
   vpc_id = var.vpc_id
 }
 
 resource "aws_vpc_security_group_ingress_rule" "allow_https_from_bastion" {
-  security_group_id = aws_security_group.eks_ap_northeast_2_cluster.id
+  security_group_id = aws_security_group.eks_cluster_security_group.id
   cidr_ipv4 = "${var.bastion_ip}/32"
   from_port = 443
   to_port = 443
@@ -83,17 +83,17 @@ resource "aws_iam_role" "eks_node_group" {
   })
 }
 
-resource "aws_iam_role_policy_attachment" "eks-node-group-AmazonEKSWorkerNodePolicy" {
+resource "aws_iam_role_policy_attachment" "eks_node_group_AmazonEKSWorkerNodePolicy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
   role       = aws_iam_role.eks_node_group.name
 }
 
-resource "aws_iam_role_policy_attachment" "eks-node-group-AmazonEKS_CNI_Policy" {
+resource "aws_iam_role_policy_attachment" "eks_node_group_AmazonEKS_CNI_Policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
   role       = aws_iam_role.eks_node_group.name
 }
 
-resource "aws_iam_role_policy_attachment" "eks-node-group-AmazonEC2ContainerRegistryReadOnly" {
+resource "aws_iam_role_policy_attachment" "eks_node_group_AmazonEC2ContainerRegistryReadOnly" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
   role       = aws_iam_role.eks_node_group.name
 }

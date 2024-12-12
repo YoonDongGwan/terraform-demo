@@ -47,30 +47,31 @@ module "private_subnet" {
   automatic_public_ip = false
   vpc_cidr_block      = var.vpc_cidr_block
   access_modifier     = "private"
-  nat_subnet_id       = module.public_subnet.subnet_id[0]
+  nat_subnet_id       = module.public_subnet.subnet_id[keys(local.public_subnet_cidr_blocks)[0]]
   region              = var.region
 }
 
-# module "ec2_bastion" {
-#   source        = "./ec2"
-#   instance_type = "t2.micro"
-#   subnet_id     = module.public_subnet.subnet_id[0]
-#   public_key    = var.public_key
-#   instance_name = "ec2-${element(local.availability_zones,0)}-bastion"
-#   vpc_id = module.vpc.vpc_id
-#   security_group_name = "sgr-ec2-${var.region}-bastion"
-# }
+module "ec2_bastion" {
+  source        = "./ec2"
+  instance_type = "t2.micro"
+  subnet_id     = module.public_subnet.subnet_id[keys(local.public_subnet_cidr_blocks)[0]]
+  public_key    = var.public_key
+  vpc_id = module.vpc.vpc_id
+  instance_name_suffix = "bastion"
+}
 
-# module "eks_cluster" {
-#   source = "./eks"
-#   cluster_name = "eks-cluster-ap-northeast-2"
-#   private_subnet_a = module.private_subnet["ap-northeast-2a"].subnet_id
-#   private_subnet_b = module.private_subnet["ap-northeast-2b"].subnet_id
-#   bastion_ip = module.ec2_bastion.bastion_ip
-#   node_group_name = "eks-node-group-t3-medium"
-#   node_group_instance_type = "t3.medium"
-#   scaling_desired_size = 3
-#   scaling_max_size = 2
-#   scaling_min_size = 2
-#   vpc_id = module.vpc.vpc_id
-# }
+module "eks_cluster" {
+  source = "./eks"
+  cluster_name = "eks-cluster-ap-northeast-2"
+  subnet_list = values(module.private_subnet.subnet_id)
+  bastion_ip = module.ec2_bastion.bastion_ip
+  node_group_name = "eks-node-group-t3-medium"
+  node_group_instance_type = "t3.medium"
+  scaling_desired_size = 3
+  scaling_max_size = 2
+  scaling_min_size = 2
+  vpc_id = module.vpc.vpc_id
+  region = var.region
+  endpoint_private_access = true
+  endpoint_public_access = false
+}

@@ -15,6 +15,10 @@ data "aws_ami" "amazon_linux_2023_latest" {
   owners = [ "amazon" ]
 }
 
+data "aws_subnet" "ec2_subnet" {
+  id = var.subnet_id
+}
+
 resource "aws_key_pair" "ec2_key_pair" {
   key_name = "ec2-key-pair"
   public_key = var.public_key
@@ -27,14 +31,14 @@ resource "aws_instance" "ec2_instance" {
   key_name = aws_key_pair.ec2_key_pair.key_name
   vpc_security_group_ids = [ aws_security_group.ec2_security_group.id ]
   tags = {
-    Name = var.instance_name
+    Name = "ec2-${data.aws_subnet.ec2_subnet.availability_zone}-${var.instance_name_suffix}"
   }
   depends_on = [ aws_security_group.ec2_security_group ]
 }
 
 resource "aws_security_group" "ec2_security_group" {
   vpc_id = var.vpc_id
-  name = var.security_group_name
+  name = "sgr-ec2-${data.aws_subnet.ec2_subnet.availability_zone}-${var.instance_name_suffix}"
 }
 resource "aws_vpc_security_group_ingress_rule" "allow_ssh" {
   security_group_id = aws_security_group.ec2_security_group.id

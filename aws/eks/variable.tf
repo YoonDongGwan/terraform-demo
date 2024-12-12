@@ -1,11 +1,8 @@
 variable "cluster_name" {
   type = string
 }
-variable "private_subnet_a" {
-  type = string
-}
-variable "private_subnet_b" {
-  type = string
+variable "subnet_list" {
+  type = list(string)
 }
 variable "bastion_ip" {
   type = string
@@ -26,5 +23,14 @@ variable "node_group_name" {
   type = string
 }
 variable "vpc_id" {
+  type = string
+}
+variable "endpoint_private_access" {
+  type = bool
+}
+variable "endpoint_public_access" {
+  type = bool
+}
+variable "region" {
   type = string
 }
