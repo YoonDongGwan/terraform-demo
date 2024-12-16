@@ -88,3 +88,7 @@ module "rds_cluster" {
   eks_subnet_cidr_block = values(module.private_subnet.cidr_block)
   bastion_private_ip    = module.ec2_bastion.bastion_private_ip
 }
+
+module "ecr" {
+  source = "./ecr"
+}

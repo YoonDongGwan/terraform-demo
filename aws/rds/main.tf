@@ -50,7 +50,7 @@ resource "aws_vpc_security_group_ingress_rule" "allow_mysql_from_eks" {
 
 resource "aws_vpc_security_group_ingress_rule" "allow_mysql_from_bastion" {
   security_group_id = aws_security_group.rds_security_group.id
-  cidr_ipv4 = var.bastion_private_ip
+  cidr_ipv4 = "${var.bastion_private_ip}/32"
   from_port = 3306
   ip_protocol = "tcp"
   to_port = 3306
