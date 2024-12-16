@@ -13,6 +13,9 @@ variable "master_password" {
 variable "master_username" {
   type = string
 }
+variable "bastion_private_ip" {
+  type = string
+}
 variable "availability_zones" {
   type = list(string)
 }
