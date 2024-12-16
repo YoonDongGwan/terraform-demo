@@ -6,6 +6,7 @@ resource "aws_subnet" "subnet" {
   map_public_ip_on_launch = var.automatic_public_ip
   tags = {
     Name = "subnet-${each.key}-${var.access_modifier}"
+    "kubernetes.io/role/elb" = var.access_modifier == "public" ? 1 : 0
   }
 }
 resource "aws_internet_gateway" "internet_gateway" {
@@ -13,6 +14,7 @@ resource "aws_internet_gateway" "internet_gateway" {
   vpc_id = var.vpc_id
   tags = {
     Name = "igw-${var.region}"
+
   }
 }
 

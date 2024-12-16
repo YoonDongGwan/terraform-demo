@@ -52,26 +52,38 @@ module "private_subnet" {
 }
 
 module "ec2_bastion" {
-  source        = "./ec2"
-  instance_type = "t2.micro"
-  subnet_id     = module.public_subnet.subnet_id[keys(local.public_subnet_cidr_blocks)[0]]
-  public_key    = var.public_key
-  vpc_id = module.vpc.vpc_id
+  source               = "./ec2"
+  instance_type        = "t2.micro"
+  subnet_id            = module.public_subnet.subnet_id[keys(local.public_subnet_cidr_blocks)[0]]
+  public_key           = var.public_key
+  vpc_id               = module.vpc.vpc_id
   instance_name_suffix = "bastion"
 }
 
 module "eks_cluster" {
-  source = "./eks"
-  cluster_name = "eks-cluster-ap-northeast-2"
-  subnet_list = values(module.private_subnet.subnet_id)
-  bastion_ip = module.ec2_bastion.bastion_ip
-  node_group_name = "eks-node-group-t3-medium"
+  source                   = "./eks"
+  cluster_name             = "eks-cluster-ap-northeast-2"
+  subnet_list              = values(module.private_subnet.subnet_id)
+  bastion_ip               = module.ec2_bastion.bastion_private_ip
+  node_group_name          = "eks-node-group-t3-medium"
   node_group_instance_type = "t3.medium"
-  scaling_desired_size = 2
-  scaling_max_size = 3
-  scaling_min_size = 2
-  vpc_id = module.vpc.vpc_id
-  region = var.region
-  endpoint_private_access = true
-  endpoint_public_access = false
+  scaling_desired_size     = 2
+  scaling_max_size         = 3
+  scaling_min_size         = 2
+  vpc_id                   = module.vpc.vpc_id
+  region                   = var.region
+  endpoint_private_access  = true
+  endpoint_public_access   = false
+}
+
+module "rds_cluster" {
+  source                = "./rds"
+  vpc_id                = module.vpc.vpc_id
+  subnet_ids            = [module.private_subnet.subnet_id["ap-northeast-2b"], module.private_subnet.subnet_id["ap-northeast-2c"]]
+  availability_zones    = ["ap-northeast-2a", "ap-northeast-2b", "ap-northeast-2c"]
+  engine                = "aurora-mysql"
+  engine_version        = "5.7.mysql_aurora.2.11.2"
+  master_password       = "dgyoon1!"
+  master_username       = "dgyoon"
+  eks_subnet_cidr_block = values(module.private_subnet.cidr_block)
 }
