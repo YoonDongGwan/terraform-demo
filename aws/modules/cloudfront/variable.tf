@@ -1,6 +1,9 @@
 variable "domain_name" {
   type = string
 }
-variable "origin_id" {
+variable "bucket_id" {
+  type = string
+}
+variable "bucket_name" {
   type = string
 }

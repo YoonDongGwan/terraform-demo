@@ -96,11 +96,11 @@ module "ec2_bastion" {
 module "s3_web" {
   source = "./modules/s3"
   bucket_name = "sample-dgyoon-web-bucket"
-  cloudfront_arn = module.cloudfront.arn
 }
 
 module "cloudfront" {
   source = "./modules/cloudfront"
-  origin_id = module.s3_web.bucket_id
+  bucket_id = module.s3_web.bucket_id
   domain_name = module.s3_web.bucekt_domain_name
+  bucket_name = module.s3_web.bucket_name
 }
