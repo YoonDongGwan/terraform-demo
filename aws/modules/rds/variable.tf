@@ -25,3 +25,9 @@ variable "subnet_ids" {
 variable "eks_subnet_cidr_block" {
   type = list(string)
 }
+variable "cluster_identifier" {
+  type = string
+}
+variable "instance_class" {
+  type = string
+}

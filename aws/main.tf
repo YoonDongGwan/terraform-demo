@@ -60,38 +60,40 @@ module "ec2_bastion" {
   instance_name_suffix = "bastion"
 }
 
-# module "eks_cluster" {
-#   source                   = "./modules/eks"
-#   cluster_name             = "eks-cluster-ap-northeast-2"
-#   subnet_list              = values(module.private_subnet.subnet_id)
-#   bastion_ip               = module.ec2_bastion.bastion_private_ip
-#   node_group_name          = "eks-node-group-t3-medium"
-#   node_group_instance_type = "t3.medium"
-#   scaling_desired_size     = 2
-#   scaling_max_size         = 3
-#   scaling_min_size         = 2
-#   vpc_id                   = module.vpc.vpc_id
-#   region                   = var.region
-#   endpoint_private_access  = true
-#   endpoint_public_access   = false
-# }
+module "eks_cluster" {
+  source                   = "./modules/eks"
+  cluster_name             = "eks-cluster-ap-northeast-2"
+  subnet_list              = values(module.private_subnet.subnet_id)
+  bastion_ip               = module.ec2_bastion.bastion_private_ip
+  node_group_name          = "eks-node-group-t3-medium"
+  node_group_instance_type = "t3.medium"
+  scaling_desired_size     = 2
+  scaling_max_size         = 3
+  scaling_min_size         = 2
+  vpc_id                   = module.vpc.vpc_id
+  region                   = var.region
+  endpoint_private_access  = true
+  endpoint_public_access   = false
+}
 
-# module "rds_cluster" {
-#   source                = "./modules/rds"
-#   vpc_id                = module.vpc.vpc_id
-#   subnet_ids            = [module.private_subnet.subnet_id["ap-northeast-2b"], module.private_subnet.subnet_id["ap-northeast-2c"]]
-#   availability_zones    = ["ap-northeast-2a", "ap-northeast-2b", "ap-northeast-2c"]
-#   engine                = "aurora-mysql"
-#   engine_version        = "5.7.mysql_aurora.2.11.2"
-#   master_password       = "dgyoon1!"
-#   master_username       = "dgyoon"
-#   eks_subnet_cidr_block = values(module.private_subnet.cidr_block)
-#   bastion_private_ip    = module.ec2_bastion.bastion_private_ip
-# }
+module "rds_cluster" {
+  source                = "./modules/rds"
+  vpc_id                = module.vpc.vpc_id
+  subnet_ids            = [module.private_subnet.subnet_id["ap-northeast-2b"], module.private_subnet.subnet_id["ap-northeast-2c"]]
+  availability_zones    = ["ap-northeast-2a", "ap-northeast-2b", "ap-northeast-2c"]
+  cluster_identifier = "rds-cluster-ap-northeast-2"
+  engine                = "aurora-mysql"
+  engine_version        = "5.7.mysql_aurora.2.11.2"
+  master_password       = "dgyoon1!"
+  master_username       = "dgyoon"
+  eks_subnet_cidr_block = values(module.private_subnet.cidr_block)
+  bastion_private_ip    = module.ec2_bastion.bastion_private_ip
+  instance_class = "db.t3.medium"
+}
 
-# module "ecr" {
-#   source = "./ecr"
-# }
+module "ecr" {
+  source = "./ecr"
+}
 
 module "s3_web" {
   source = "./modules/s3"

@@ -1,5 +1,5 @@
 resource "aws_rds_cluster" "rds_cluster" {
-  cluster_identifier = "rds-cluster-ap-northeast-2"
+  cluster_identifier = var.cluster_identifier
   engine = var.engine
   engine_version = var.engine_version
   availability_zones = var.availability_zones
@@ -8,7 +8,7 @@ resource "aws_rds_cluster" "rds_cluster" {
   master_password = var.master_password
   vpc_security_group_ids = [aws_security_group.rds_security_group.id]
   tags = {
-    Name = "rds-cluster-ap-northeast-2"
+    Name = "${var.cluster_identifier}"
   }
   skip_final_snapshot = true
 }
@@ -19,7 +19,7 @@ resource "aws_rds_cluster_instance" "rds_cluster_instance" {
   cluster_identifier = aws_rds_cluster.rds_cluster.id
   engine = aws_rds_cluster.rds_cluster.engine
   engine_version = aws_rds_cluster.rds_cluster.engine_version
-  instance_class = "db.t3.medium"
+  instance_class = var.instance_class
   db_subnet_group_name = aws_rds_cluster.rds_cluster.db_subnet_group_name
   tags = {
     Name = "${aws_rds_cluster.rds_cluster.cluster_identifier}-instance-${count.index}"
