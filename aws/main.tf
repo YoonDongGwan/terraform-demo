@@ -10,6 +10,9 @@ terraform {
     region = "ap-northeast-2"
     key = "terraform.tfstate"
   }
+  # backend "local" {
+  #   path = "./terraform.tfstate"
+  # }
 }
 
 provider "aws" {
