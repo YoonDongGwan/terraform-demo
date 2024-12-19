@@ -20,7 +20,6 @@ data "aws_subnet" "ec2_subnet" {
 }
 
 resource "aws_key_pair" "ec2_key_pair" {
-  key_name = "ec2-key-pair"
   public_key = var.public_key
 }
 
