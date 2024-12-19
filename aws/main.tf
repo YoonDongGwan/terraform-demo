@@ -5,6 +5,14 @@ terraform {
       version = "5.80.0"
     }
   }
+  backend "s3" {
+    bucket = "s3-ap-northeast-2-tfstate"
+    region = "ap-northeast-2"
+    key = "terraform.tfstate"
+  }
+  # backend "local" {
+  #   path = "./terraform.tfstate"
+  # }
 }
 
 provider "aws" {
@@ -21,6 +29,11 @@ locals {
     "ap-northeast-2b" = cidrsubnet(var.vpc_cidr_block, 8, 11),
     "ap-northeast-2c" = cidrsubnet(var.vpc_cidr_block, 8, 12)
   }
+}
+
+module "s3_tfstate" {
+  source = "./modules/s3"
+  bucket_name = "s3-ap-northeast-2-tfstate"
 }
 
 module "vpc" {
@@ -51,6 +64,14 @@ module "private_subnet" {
   region              = var.region
 }
 
+module "ec2_atlantis" {
+  source               = "./modules/ec2"
+  instance_type        = "t3.medium"
+  subnet_id            = module.public_subnet.subnet_id[keys(local.public_subnet_cidr_blocks)[0]]
+  public_key           = var.public_key
+  vpc_id               = module.vpc.vpc_id
+  instance_name_suffix = "atlantis"
+}
 module "ec2_bastion" {
   source               = "./modules/ec2"
   instance_type        = "t2.micro"
@@ -95,14 +116,14 @@ module "ecr" {
   source = "./ecr"
 }
 
-module "s3_web" {
-  source = "./modules/s3"
-  bucket_name = "sample-dgyoon-web-bucket"
-}
+# module "s3_web" {
+#   source = "./modules/s3"
+#   bucket_name = "sample-dgyoon-web-bucket"
+# }
 
-module "cloudfront" {
-  source = "./modules/cloudfront"
-  bucket_id = module.s3_web.bucket_id
-  domain_name = module.s3_web.bucekt_domain_name
-  bucket_name = module.s3_web.bucket_name
-}
+# module "cloudfront" {
+#   source = "./modules/cloudfront"
+#   bucket_id = module.s3_web.bucket_id
+#   domain_name = module.s3_web.bucekt_domain_name
+#   bucket_name = module.s3_web.bucket_name
+# }
